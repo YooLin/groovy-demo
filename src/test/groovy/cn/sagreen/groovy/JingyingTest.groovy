@@ -3,7 +3,7 @@ package cn.sagreen.groovy
  * 开发人员   YooLin1c
  * 编写日期   2019-01-15
  * 联系邮箱   401664157@qq.com
- * 作用描述   
+ * 作用描述   金鹰推单算法优化
  */
 class JingyingTest {
     static void main(String[] args) {
