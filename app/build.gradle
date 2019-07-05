@@ -1,0 +1,6 @@
+// 使用war插件将项目打成war包
+apply plugin: 'war'
+
+dependencies {
+    compile project(':repository')
+}
