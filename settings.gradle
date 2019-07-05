@@ -1,3 +1,7 @@
 // 多项目构建时的根项目名
 rootProject.name = 'groovy-demo'
+// 子项目
+include 'model'
+include 'repository'
+include 'app'
 

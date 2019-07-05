@@ -1,23 +1,92 @@
-plugins {
-    id 'groovy'
-    id 'java'
-    // 使用war插件将项目打成war包
-    // id 'war'
+// 所有项目配置
+allprojects {
+    // 插件
+    apply plugin: 'groovy'
+    apply plugin: 'java'
+
+    // jdk编译版本
+    sourceCompatibility = 1.8
+
+    // 使用maven发布插件
+    apply plugin: 'maven-publish'
+
+    // 配置发布插件
+    publishing {
+        publications {
+            // 发布jar包
+            myPublish(MavenPublication) {
+                from components.java
+            }
+        }
+
+        // 指定发布到具体位置的maven仓库
+        repositories {
+            maven {
+                name 'myRepo'
+                url ''
+            }
+        }
+    }
 }
 
-group 'cn.sagreen'
-version '1.0-SNAPSHOT'
+// 子项目配置
+subprojects {
+    // 仓库
+    repositories {
+        mavenLocal()
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        mavenCentral()
+    }
 
-// 使用jdk1.8
-sourceCompatibility = 1.8
+    // 依赖
+    dependencies {
+        // runtime extends compile
+        compile 'org.codehaus.groovy:groovy-all:2.5.5'
 
-repositories {
-    mavenCentral()
+        compile 'ch.qos.logback:logback-classic:1.2.1'
+        compile 'org.hibernate:hibernate-core:3.6.3.Final'
+
+        // 排除冲突的slf4j-api依赖
+//    compile('org.hibernate:hibernate-core:3.6.3.Final') {
+//        exclude group: 'org.slf4j', module: 'slf4j-api'
+//    }
+
+        testCompile 'junit:junit:4.12'
+    }
 }
 
-dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.5.5'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+// 定义函数
+def createFile = { path ->
+    File file = new File(path)
+    if (!file.exists()) {
+        file.mkdirs()
+    }
 }
 
 // task
+task makeJavaDir() {
+    def paths = ['src/main/java', 'src/main/resources', 'src/test/java', 'src/test/resources']
+    doFirst {
+        paths.forEach(createFile)
+    }
+}
+
+task makeWebDir() {
+    // dependsOn 指定当前task依赖的task，需指定在执行步骤前
+    dependsOn 'makeJavaDir'
+    def paths = ['src/main/webapp', 'src/test/webapp']
+    doLast {
+        paths.forEach(createFile)
+    }
+}
+
+configurations.all {
+    // 指定版本冲突策略（默认会使用版本最高的版本）
+    resolutionStrategy {
+        // 失败策略
+//        failOnVersionConflict()
+
+        // 强制指定版本
+        force 'org.slf4j:slf4j-api:1.7.24'
+    }
+}
